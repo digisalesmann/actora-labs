@@ -1,15 +1,17 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 
-interface VerifyQuestParams {
-  params: {
-    questId: string;
-  }
-}
-
-export async function POST(request: Request, { params }: VerifyQuestParams) {
-  const { questId } = params;
-  // In the future, you'll add logic here to verify the quest
+// The second argument to the route handler is a context object
+// which contains the dynamic route parameters.
+export async function POST(
+  request: NextRequest, 
+  context: { params: { questId: string } }
+) {
+  // We can destructure the questId directly from the context object.
+  const { questId } = context.params;
+  
+  // In the future, you'll add your logic here to verify the quest.
   console.log(`Verifying quest with ID: ${questId}`);
 
+  // Return a success response.
   return NextResponse.json({ message: `Verification for quest ${questId} received.` });
 }
