@@ -6,6 +6,7 @@ import {
   Search, X as CloseIcon, Filter, Zap, ChevronDown, Trophy, Clock, 
   Award, Check, BookOpen, Layers, Target, TrendingUp, DollarSign, Image as ImageIcon, ArrowRight
 } from 'lucide-react';
+import Image from 'next/image';
 
 // --- DATA & CONSTANTS ---
 
@@ -17,17 +18,17 @@ const allStatuses = ['Live', 'New', 'Expiring', 'Completed'];
 
 // UPDATED Mapped logos using placehold.co (using project initials as placeholders since local files are unavailable)
 const projectLogos: Record<string, string> = {
-    'Monad': 'logos/monad.png',
-    'Berachain': 'logos/bera.png',
-    'Arbitrum': 'logos/arb.svg',
-    'Optimism': 'logos/op.svg',
-    'Polygon': 'logos/poly.svg',
-    'zkSync': 'logos/zk.png',
-    'Linea': 'logos/linea.svg',
-    'Starknet': 'logos/starknet.svg',
-    'Solana': 'logos/solana.svg',
-    'Binance': 'logos/bnb.svg',
-    'Scroll': 'logos/scroll.svg',
+    'Monad': '/logos/monad.png',
+    'Berachain': '/logos/bera.png',
+    'Arbitrum': '/logos/arb.svg',
+    'Optimism': '/logos/op.svg',
+    'Polygon': '/logos/poly.svg',
+    'zkSync': '/logos/zk.png',
+    'Linea': '/logos/linea.svg',
+    'Starknet': '/logos/starknet.svg',
+    'Solana': '/logos/solana.svg',
+    'Binance': '/logos/bnb.svg',
+    'Scroll': '/logos/scroll.svg',
 };
 
 // --- TYPE DEFINITIONS ---
@@ -250,32 +251,42 @@ const HeroSection: React.FC = () => {
 };
 
 
-// 2. PROJECT LOGO
+// 2. PROJECT LOGO (Corrected and Optimized)
 interface ProjectLogoProps {
   project: string;
   size?: number;
 }
-const ProjectLogo: React.FC<ProjectLogoProps> = ({ project, size = 40 }) => (
-  <div 
-    className="rounded-xl overflow-hidden shadow-lg border-2 border-purple-500/20 flex-shrink-0"
-    style={{ width: size, height: size }}
-  >
-    {/* NOTE: The images below use placeholder URLs since local paths (logos/monad.png, etc.) 
-      are inaccessible in this environment. The onError fallback handles cases where the 
-      placeholder might fail (though unlikely).
-    */}
-    <img 
-        src={projectLogos[project]} 
-        alt={`${project} Logo`} 
-        className="w-full h-full object-cover"
-        onError={(e) => {
-            e.currentTarget.onerror = null; 
-            e.currentTarget.src = `https://placehold.co/${size}x${size}/0B1227/ffffff?text=${project.charAt(0)}`;
-        }}
-    />
-  </div>
-);
+const ProjectLogo: React.FC<ProjectLogoProps> = ({ project, size = 40 }) => {
+  // Use the project name to find the correct logo URL from your 'projectLogos' map
+  const initialSrc = projectLogos[project]; 
+  const fallbackSrc = `https://placehold.co/${size}x${size}/1E293B/94A3B8?text=${project.charAt(0)}`;
+  
+  // Use state to manage the image source for the fallback
+  const [imgSrc, setImgSrc] = useState(initialSrc);
 
+  // useEffect to reset the image if the project prop changes
+  useEffect(() => {
+    setImgSrc(initialSrc);
+  }, [initialSrc]);
+
+  return (
+    <div 
+      className="relative flex-shrink-0"
+      style={{ width: size, height: size }}
+    >
+      <Image 
+        src={imgSrc || fallbackSrc} // Use the state source, or the fallback if the initial source is missing
+        alt={`${project} logo`}
+        fill={true} // The 'fill' prop makes the image cover the parent div
+        className="object-cover"
+        onError={() => {
+          // If the image fails to load, update the state to the fallback URL
+          setImgSrc(fallbackSrc);
+        }}
+      />
+    </div>
+  );
+};
 
 // 3. QUEST CARD
 const QuestCardPro: React.FC<{ quest: Quest }> = ({ quest }) => {
