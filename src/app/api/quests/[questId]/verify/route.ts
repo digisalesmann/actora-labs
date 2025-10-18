@@ -1,13 +1,14 @@
 import { NextResponse, NextRequest } from 'next/server';
 
 // The second argument to the route handler is a context object
-// which contains the dynamic route parameters.
+// which contains the dynamic route parameters. The build environment
+// indicates that the `params` object is a Promise that needs to be awaited.
 export async function POST(
   request: NextRequest, 
-  context: { params: { questId: string } }
+  context: { params: Promise<{ questId: string }> }
 ) {
-  // We can destructure the questId directly from the context object.
-  const { questId } = context.params;
+  // We await the promise to get the resolved params object.
+  const { questId } = await context.params;
   
   // In the future, you'll add your logic here to verify the quest.
   console.log(`Verifying quest with ID: ${questId}`);
@@ -15,3 +16,4 @@ export async function POST(
   // Return a success response.
   return NextResponse.json({ message: `Verification for quest ${questId} received.` });
 }
+
