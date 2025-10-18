@@ -1,0 +1,74 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String       @id @default(cuid())
+  walletAddress String       @unique
+  xp            Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  submissions   Submission[]
+}
+
+model Project {
+  id         String  @id @default(cuid())
+  name       String
+  logoUrl    String
+  twitterUrl String?
+  websiteUrl String
+  quests     Quest[]
+}
+
+model Quest {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  xpReward    Int
+  projectId   String
+  project     Project      @relation(fields: [projectId], references: [id])
+  tasks       Task[]
+  submissions Submission[]
+  isActive    Boolean      @default(true)
+  startDate   DateTime?
+  endDate     DateTime?
+}
+
+enum TaskType {
+  TWITTER_FOLLOW
+  TWITTER_RETWEET
+  DISCORD_JOIN
+  ONCHAIN_SWAP
+  ONCHAIN_MINT
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  description String
+  type        TaskType
+  target      String // e.g., Twitter handle, Discord invite link, contract address
+  questId     String
+  quest       Quest        @relation(fields: [questId], references: [id])
+  submissions Submission[]
+}
+
+model Submission {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  questId     String
+  quest       Quest     @relation(fields: [questId], references: [id])
+  taskId      String
+  task        Task      @relation(fields: [taskId], references: [id])
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+
+  @@unique([userId, taskId]) // A user can only complete a task once
+}
