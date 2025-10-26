@@ -2,8 +2,8 @@
 'use client'
 
 import { useSession, signOut } from 'next-auth/react'
-import { useAccount, useDisconnect } from 'wagmi'
-import { Wallet, LogOut, User, Zap, Mail, Twitter, Disc } from 'lucide-react'
+import { useAccount} from 'wagmi'
+import {LogOut, User, Zap } from 'lucide-react'
 import Link from 'next/link'
 
 // Using shadcn/ui components (assuming you have them)
