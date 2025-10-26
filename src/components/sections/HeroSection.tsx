@@ -45,7 +45,7 @@ export const HeroSection = () => {
   };
 
   return (
-    <section className="relative w-full h-[90vh] min-h-[700px] flex items-center justify-center overflow-hidden bg-black px-4">
+    <section className="relative w-full h-[90vh] min-h-[700px] flex items-center justify-center overflow-hidden bg-slate-950 px-4">
       {/* Background Grid */}
       <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:36px_36px]"></div>
 

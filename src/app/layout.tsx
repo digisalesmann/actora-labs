@@ -1,8 +1,8 @@
-// src/app/layout.tsx
 import type { Metadata } from 'next';
-import { GeistSans } from 'geist/font/sans'; // <-- Import Geist Sans
+import { GeistSans } from 'geist/font/sans';
 import './globals.css';
 import { Web3Provider } from '@/providers/Web3Provider';
+import Header from '@/components/layout/Header';
 
 export const metadata: Metadata = {
   title: 'Actora Hub',
@@ -15,9 +15,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark"> {/* <-- Add className="dark" */}
-      <body className={GeistSans.className}> {/* <-- Use Geist Sans */}
-        <Web3Provider>{children}</Web3Provider>
+    <html lang="en" className="dark">
+      <body className={GeistSans.className}>
+        <Web3Provider>
+          <Header />
+          {children}
+        </Web3Provider>
       </body>
     </html>
   );

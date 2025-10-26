@@ -1,29 +1,74 @@
+// src/auth.ts (or app/auth.ts if using App Router)
 import NextAuth from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
+import type { NextAuthConfig } from "next-auth";
+import Discord from "next-auth/providers/discord";
+import Google from "next-auth/providers/google";
+import Credentials from "next-auth/providers/credentials";
 
-const handler = NextAuth({
-  providers: [
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        username: { label: "Username", type: "text" },
-        password: { label: "Password", type: "password" }
-      },
-      // This comment explicitly tells ESLint to ignore the "unused variables" rule for the next line.
-      // This is the most definitive way to solve this specific warning.
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      async authorize(_credentials, _req) {
-        // Your real user authentication logic will go here later.
-        // For now, we return a mock user to make the setup work.
-        const user = { id: "1", name: "J Smith", email: "jsmith@example.com" };
+// The Web3 authentication logic requires a custom flow. 
+// We will implement the actual message signing check on the API endpoint, 
+// and use the Credentials provider here for simplicity and to handle the session creation.
+// NOTE: For a production app, you MUST use a database adapter with NextAuth.
 
-        if (user) {
-          return user;
-        }
-        return null;
-      }
-    })
-  ],
-});
+export const config = {
+  providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
+    Discord({
+      clientId: process.env.DISCORD_CLIENT_ID,
+      clientSecret: process.env.DISCORD_CLIENT_SECRET,
+    }),
+    // Custom Wallet/Credentials Provider for Web3 Auth
+    Credentials({
+      name: "WalletAuth",
+      credentials: {
+        address: { label: "Wallet Address", type: "text" },
+        signature: { label: "Signature", type: "text" },
+      },
+      async authorize(credentials) {
+        // Cast the address to its expected type, allowing for undefined
+        const address = credentials.address as string | undefined;
 
-export { handler as GET, handler as POST };
+        // 🛠️ FIX: Check for address existence and type before calling .slice()
+        if (address && typeof address === 'string' && credentials.signature) {
+          
+          // The address is now confirmed to be a string, so .slice() is safe.
+          const truncatedAddress = address.slice(0, 6) + '...' + address.slice(-4);
+
+          // Placeholder logic: Always succeed for now, as the actual signing is on the client.
+          return { 
+                id: address, 
+                name: truncatedAddress 
+            };
+        }
+        
+        return null;
+      },
+    }),
+    // Email/Password provider (requires nodemailer setup or similar)
+    // Placeholder - typically handled via a custom form and database lookup
+    Credentials({
+        name: "EmailPassword",
+        credentials: {
+            email: { label: "Email", type: "email" },
+            password: { label: "Password", type: "password" },
+        },
+        async authorize(credentials) {
+          
+            // Your actual database lookup and password verification logic goes here
+            if (credentials.email === "test@actora.xyz" && credentials.password === "password") {
+                return { id: "email-user-123", name: "Actora User" };
+            }
+            return null;
+        }
+    })
+  ],
+  // ... other NextAuth options (pages, callbacks, session, etc.)
+  pages: {
+    signIn: '/auth/signin',
+  }
+} satisfies NextAuthConfig;
+
+export const { handlers, auth, signIn, signOut } = NextAuth(config);

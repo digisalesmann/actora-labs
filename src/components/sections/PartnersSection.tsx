@@ -20,8 +20,9 @@ export const PartnersSection = () => {
   const duplicatedLogos = [...partnerLogos, ...partnerLogos];
 
   return (
-    <section className="pb-24 bg-black text-white relative overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 w-[60rem] h-[60rem] bg-purple-900/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 -z-10"></div>
+    <section className="pb-24 bg-slate-950 text-white relative overflow-hidden">
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,_rgba(124,58,237,0.05),transparent_50%)]"></div>
+      <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#8080801a_1px,transparent_1px),linear-gradient(to_bottom,#8080801a_1px,transparent_1px)] bg-[size:36px_36px]"></div>
 
       <div className="max-w-7xl mx-auto text-center px-4">
         <motion.h3
