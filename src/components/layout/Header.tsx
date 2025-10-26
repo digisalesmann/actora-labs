@@ -186,28 +186,34 @@ export default function Header() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] bg-[#0c021f] text-white p-4 flex flex-col h-screen"
+            className="fixed inset-0 z-[100] bg-[#0c021f] text-white flex flex-col"
+            style={{ height: '100dvh' }}
           >
-            <div className="flex justify-between items-center mb-6">
+            {/* Header */}
+            <div className="flex justify-between items-center p-4 pb-3 border-b border-white/10 flex-shrink-0">
               <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center">
-                <div className="relative h-12 w-36">
+                <div className="relative h-10 w-32">
                   <Image src="/actora-logoo.png" alt="Actora Logo" fill className="object-contain" priority />
                 </div>
               </Link>
-              <button onClick={() => setMenuOpen(false)} aria-label="Close menu">
-                <X size={28} />
+              <button onClick={() => setMenuOpen(false)} aria-label="Close menu" className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                <X size={24} />
               </button>
             </div>
             
-            <nav className="flex-grow overflow-y-auto">
-              <div className="flex flex-col gap-2">
+            {/* Scrollable Navigation */}
+            <nav className="flex-1 overflow-y-auto px-4 py-2" style={{ minHeight: 0 }}>
+              <div className="flex flex-col gap-1">
                 {navLinks.map(({ label, items }) => {
                    const isOpen = openDropdown === label
                    return (
-                     <div key={label} className="border-b border-white/10 last:border-b-0">
-                        <button onClick={() => toggleDropdown(label)} className="w-full flex justify-between items-center py-4 text-lg font-semibold">
+                     <div key={label} className="border-b border-white/5 last:border-b-0">
+                        <button 
+                          onClick={() => toggleDropdown(label)} 
+                          className="w-full flex justify-between items-center py-3.5 text-base font-semibold hover:text-purple-400 transition-colors"
+                        >
                            {label}
-                           {isOpen ? <ChevronUp size={20} className="text-purple-400" /> : <ChevronDown size={20} className="text-gray-500" />}
+                           {isOpen ? <ChevronUp size={18} className="text-purple-400" /> : <ChevronDown size={18} className="text-gray-500" />}
                         </button>
                         <AnimatePresence>
                           {isOpen && (
@@ -216,13 +222,18 @@ export default function Header() {
                               initial={{ height: 0, opacity: 0 }}
                               animate={{ height: 'auto', opacity: 1 }}
                               exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.3, ease: 'easeInOut' }}
+                              transition={{ duration: 0.25, ease: 'easeInOut' }}
                               className="overflow-hidden"
                             >
-                               <div className="flex flex-col gap-2 pt-2 pb-4 pl-4">
+                               <div className="flex flex-col gap-1 pb-3 pl-2">
                                 {items.map(({ title, link, icon }) => (
-                                    <Link key={title} href={link} onClick={() => setMenuOpen(false)} className="flex items-center gap-4 py-2 rounded text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
-                                        <span className="text-purple-400">{icon}</span>
+                                    <Link 
+                                      key={title} 
+                                      href={link} 
+                                      onClick={() => setMenuOpen(false)} 
+                                      className="flex items-center gap-3 py-2.5 px-3 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-colors text-sm"
+                                    >
+                                        <span className="text-purple-400 flex-shrink-0">{icon}</span>
                                         <span>{title}</span>
                                     </Link>
                                 ))}
@@ -236,8 +247,8 @@ export default function Header() {
               </div>
             </nav>
 
-            {/* WALLET CONNECT BUTTON - MOBILE */}
-            <div className="mt-auto pt-6">
+            {/* Fixed Bottom Button */}
+            <div className="p-4 pt-3 border-t border-white/10 flex-shrink-0 bg-[#0c021f]">
               {mounted && (
                 <ConnectButton.Custom>
                   {({ account, chain, openConnectModal, openAccountModal, mounted: buttonMounted }) => {
@@ -247,14 +258,14 @@ export default function Header() {
                     return connected ? (
                       <button
                         onClick={openAccountModal}
-                        className="block w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 transition text-center py-3 rounded-full font-medium"
+                        className="block w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 transition text-center py-3.5 rounded-full font-semibold text-base shadow-lg shadow-purple-500/25"
                       >
                         {account.displayName}
                       </button>
                     ) : (
                       <button
                         onClick={openConnectModal}
-                        className="block w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 transition text-center py-3 rounded-full font-medium"
+                        className="block w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 transition text-center py-3.5 rounded-full font-semibold text-base shadow-lg shadow-purple-500/25"
                       >
                         Connect Wallet
                       </button>
@@ -263,7 +274,7 @@ export default function Header() {
                 </ConnectButton.Custom>
               )}
               {!mounted && (
-                <div className="h-12 w-full bg-white/5 rounded-full animate-pulse" />
+                <div className="h-[50px] w-full bg-white/5 rounded-full animate-pulse" />
               )}
             </div>
           </motion.div>
