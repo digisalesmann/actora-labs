@@ -9,11 +9,13 @@ async function main() {
       description: 'Perform your first token swap on Monad testnet',
       longDescription: 'Join thousands of early adopters...',
       project: {
-        name: 'Monad',
-        logo: '/logos/monad.png',
-        website: 'https://monad.xyz',
-        twitter: 'https://twitter.com/monad_xyz',
-        discord: 'https://discord.gg/monad'
+        create: {
+          name: 'Monad',
+          logo: '/logos/monad.png',
+          website: 'https://monad.xyz',
+          twitter: 'https://twitter.com/monad_xyz',
+          discord: 'https://discord.gg/monad'
+        }
       },
       category: 'DeFi',
       difficulty: 'Medium',
