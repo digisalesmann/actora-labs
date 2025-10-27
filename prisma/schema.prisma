@@ -12,12 +12,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ============================================
+// PROJECT MODEL
+// ============================================
+model Project {
+  id        String   @id @default(uuid())
+  name      String
+  logo      String?
+  website   String?
+  twitter   String?
+  discord   String?
+  quests    Quest[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+// ============================================
+// QUEST MODEL
+// ============================================
 model Quest {
   id              String   @id @default(uuid())
   title           String
   description     String
   longDescription String
-  project         Json     // { name, logo, website, twitter, discord }
   category        String
   difficulty      String
   totalXP         Int
@@ -32,33 +51,42 @@ model Quest {
   active          Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  
+
+  projectId       String?
+  project         Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
   steps           QuestStep[]
   completions     QuestCompletion[]
-  
+
   @@index([active, endDate])
   @@index([category])
 }
 
+// ============================================
+// QUEST STEP MODEL
+// ============================================
 model QuestStep {
   id               String   @id @default(uuid())
   questId          String
   order            Int
   title            String
   description      String
-  type             String   // 'twitter', 'discord', 'onchain', 'visit', 'custom'
+  type             String   // 'twitter', 'discord', 'onchain', etc.
   verificationType String   // 'manual', 'auto', 'signature'
   endpoint         String?
   requireProof     Boolean  @default(false)
   optional         Boolean  @default(false)
   points           Int
-  
+
   quest            Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
   completions      StepCompletion[]
-  
+
   @@index([questId, order])
 }
 
+// ============================================
+// QUEST COMPLETION MODEL
+// ============================================
 model QuestCompletion {
   id              String   @id @default(uuid())
   questId         String
@@ -68,32 +96,38 @@ model QuestCompletion {
   rewardClaimed   Boolean  @default(false)
   startedAt       DateTime @default(now())
   completedAt     DateTime?
-  
+
   quest           Quest    @relation(fields: [questId], references: [id])
   stepCompletions StepCompletion[]
-  
+
   @@unique([questId, walletAddress])
   @@index([walletAddress])
   @@index([status])
 }
 
+// ============================================
+// STEP COMPLETION MODEL
+// ============================================
 model StepCompletion {
   id              String   @id @default(uuid())
   completionId    String
   stepId          String
   walletAddress   String
   status          String   // 'completed', 'failed', 'pending'
-  proofData       Json?    // Any verification proof
+  proofData       Json?
   verifiedAt      DateTime?
   attempts        Int      @default(1)
-  
+
   completion      QuestCompletion @relation(fields: [completionId], references: [id], onDelete: Cascade)
   step            QuestStep       @relation(fields: [stepId], references: [id])
-  
+
   @@unique([completionId, stepId])
   @@index([walletAddress])
 }
 
+// ============================================
+// USER MODEL
+// ============================================
 model User {
   walletAddress   String   @id
   username        String?  @unique
@@ -106,7 +140,7 @@ model User {
   discordUsername String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  
+
   @@index([level])
   @@index([totalXP])
 }
