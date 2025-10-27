@@ -1,4 +1,7 @@
-// prisma/schema.prisma
+// ============================================
+// DATABASE SCHEMA (Prisma)
+// File: prisma/schema.prisma
+// ============================================
 
 generator client {
   provider = "prisma-client-js"
@@ -9,66 +12,101 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id            String       @id @default(cuid())
-  walletAddress String       @unique
-  xp            Int          @default(0)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  submissions   Submission[]
-}
-
-model Project {
-  id         String  @id @default(cuid())
-  name       String
-  logoUrl    String
-  twitterUrl String?
-  websiteUrl String
-  quests     Quest[]
-}
-
 model Quest {
-  id          String       @id @default(cuid())
-  title       String
-  description String
-  xpReward    Int
-  projectId   String
-  project     Project      @relation(fields: [projectId], references: [id])
-  tasks       Task[]
-  submissions Submission[]
-  isActive    Boolean      @default(true)
-  startDate   DateTime?
-  endDate     DateTime?
+  id              String   @id @default(uuid())
+  title           String
+  description     String
+  longDescription String
+  project         Json     // { name, logo, website, twitter, discord }
+  category        String
+  difficulty      String
+  totalXP         Int
+  tokenReward     Json?    // { amount, symbol }
+  timeEstimate    String
+  participants    Int      @default(0)
+  startDate       DateTime
+  endDate         DateTime
+  requirements    Json     // String[]
+  eligibility     Json     // { minLevel?, requiredQuests?, networkRequired? }
+  featured        Boolean  @default(false)
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  steps           QuestStep[]
+  completions     QuestCompletion[]
+  
+  @@index([active, endDate])
+  @@index([category])
 }
 
-enum TaskType {
-  TWITTER_FOLLOW
-  TWITTER_RETWEET
-  DISCORD_JOIN
-  ONCHAIN_SWAP
-  ONCHAIN_MINT
+model QuestStep {
+  id               String   @id @default(uuid())
+  questId          String
+  order            Int
+  title            String
+  description      String
+  type             String   // 'twitter', 'discord', 'onchain', 'visit', 'custom'
+  verificationType String   // 'manual', 'auto', 'signature'
+  endpoint         String?
+  requireProof     Boolean  @default(false)
+  optional         Boolean  @default(false)
+  points           Int
+  
+  quest            Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
+  completions      StepCompletion[]
+  
+  @@index([questId, order])
 }
 
-model Task {
-  id          String       @id @default(cuid())
-  description String
-  type        TaskType
-  target      String // e.g., Twitter handle, Discord invite link, contract address
-  questId     String
-  quest       Quest        @relation(fields: [questId], references: [id])
-  submissions Submission[]
+model QuestCompletion {
+  id              String   @id @default(uuid())
+  questId         String
+  walletAddress   String
+  status          String   // 'in-progress', 'completed'
+  totalXPEarned   Int      @default(0)
+  rewardClaimed   Boolean  @default(false)
+  startedAt       DateTime @default(now())
+  completedAt     DateTime?
+  
+  quest           Quest    @relation(fields: [questId], references: [id])
+  stepCompletions StepCompletion[]
+  
+  @@unique([questId, walletAddress])
+  @@index([walletAddress])
+  @@index([status])
 }
 
-model Submission {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
-  questId     String
-  quest       Quest     @relation(fields: [questId], references: [id])
-  taskId      String
-  task        Task      @relation(fields: [taskId], references: [id])
-  isCompleted Boolean   @default(false)
-  completedAt DateTime?
+model StepCompletion {
+  id              String   @id @default(uuid())
+  completionId    String
+  stepId          String
+  walletAddress   String
+  status          String   // 'completed', 'failed', 'pending'
+  proofData       Json?    // Any verification proof
+  verifiedAt      DateTime?
+  attempts        Int      @default(1)
+  
+  completion      QuestCompletion @relation(fields: [completionId], references: [id], onDelete: Cascade)
+  step            QuestStep       @relation(fields: [stepId], references: [id])
+  
+  @@unique([completionId, stepId])
+  @@index([walletAddress])
+}
 
-  @@unique([userId, taskId]) // A user can only complete a task once
+model User {
+  walletAddress   String   @id
+  username        String?  @unique
+  email           String?
+  totalXP         Int      @default(0)
+  level           Int      @default(1)
+  completedQuests Int      @default(0)
+  twitterHandle   String?
+  discordId       String?
+  discordUsername String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([level])
+  @@index([totalXP])
 }
